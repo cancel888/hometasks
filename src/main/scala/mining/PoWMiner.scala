@@ -6,13 +6,21 @@ import scala.math.BigInt
 
 class PoWMiner[HF <: CryptographicHash32](hashFunction: HF) {
 
-  private val MaxTarget: BigInt = BigInt(1, Array.fill(32)((-1).toByte))
+    private val MaxTarget: BigInt = BigInt(1, Array.fill(32)((-1).toByte))
 
-  def doWork(data: Array[Byte], difficulty: BigInt): ProvedData = ???
+    def doWork(data: Array[Byte], difficulty: BigInt): ProvedData = {
+        var nonce: Int = 1
 
-  def validateWork(data: ProvedData, difficulty: BigInt): Boolean = realDifficulty(data) >= difficulty
+        while (!validateWork(ProvedData(data, nonce), difficulty)) {
+            nonce += 1
+        }
 
-  private def realDifficulty(noncedData: ProvedData): BigInt =
-    MaxTarget / BigInt(1, hashFunction.hash(noncedData.bytes))
+        ProvedData(data, nonce)
+    }
+
+    def validateWork(data: ProvedData, difficulty: BigInt): Boolean = realDifficulty(data) >= difficulty
+
+    private def realDifficulty(noncedData: ProvedData): BigInt =
+        MaxTarget / BigInt(1, hashFunction.hash(noncedData.bytes))
 
 }
